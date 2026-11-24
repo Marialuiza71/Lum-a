@@ -1,68 +1,21 @@
-# Luméa — Cloudflare Pages + D1
+# Luméa — Cloudflare Worker + D1 (corrigido)
 
-Projeto preparado a partir do **build público recuperado** do site Luméa, mantendo as páginas e a identidade visual. O código React original não está incluído; `public/assets` contém os arquivos compilados.
+**Esta versão é para a hospedagem Cloudflare Workers com assets estáticos que aparece no seu print.**
+Inclui `src/worker.js` para atender a API; assim `/api/trpc/leads.capture` responde JSON e pode salvar o cadastro no D1. O design do site e o produto de R$ 1,00 foram mantidos.
 
-## O que funciona
-- Páginas públicas `/`, `/ofertas`, `/conteudo`, `/privacidade` e imagens locais.
-- Formulário de captura existente, agora servido pela função `POST /api/trpc/leads.capture` e gravado no D1.
-- Login próprio em `/login.html` (também `/admin`), sessão por cookie HttpOnly por 7 dias, senhas PBKDF2, limite básico de tentativas.
-- Painel em `/painel.html` para consultar leads, com paginação e logout.
-- Cadastro inicial de administrador protegido por `SETUP_TOKEN` e desabilitado depois da primeira conta.
+## Publicar pelo GitHub
 
-## 1. Envie para GitHub
-Crie um repositório e envie **o conteúdo desta pasta** para a raiz do repositório (não apenas a pasta `public`). Não envie senhas nem `.dev.vars`.
+1. Substitua **todos os arquivos na raiz** do seu repositório pelo conteúdo deste ZIP (inclusive `src/`, `functions/`, `public/` e `wrangler.jsonc`).
+2. Cloudflare > **Workers & Pages** > seu Worker > **Settings / Build** (Git integration). Confirme que a publicação usa `npx wrangler deploy` a partir da raiz, **não** um deploy apenas de assets. Publique novamente a partir do commit atualizado.
+3. O arquivo `wrangler.jsonc` configura `main: src/worker.js`, assets em `public/` e o D1 com binding `DB`. O banco usado é **lumea_d1** e o ID foi lido da URL do console do print enviado; confira se é o seu banco antes de publicar. Caso o ID seja outro, ajuste `database_id`.
+4. O segredo `SETUP_TOKEN` (mínimo de 24 caracteres) deve ser configurado em **Settings > Variables and Secrets** do Worker; não envie esse segredo ao GitHub.
+5. Se ainda não criou o administrador, abra `/login.html`. Para conferir se a API responde JSON, abra `/api/auth/setup` no site publicado: deve aparecer `{"setupRequired":true}` (ou `false` se já houver administrador).
+6. Faça um cadastro no popup; confira no D1: `SELECT email, created_at FROM leads ORDER BY created_at DESC LIMIT 5;`.
 
-## 2. Crie o D1 no Cloudflare
-Cloudflare > Workers & Pages > D1 SQL database > Create. Dê o nome `lumea-db` (outro nome também serve).
-No painel do banco, abra **Console** e execute o conteúdo completo de `schema.sql` (ou use `npx wrangler d1 execute lumea-db --remote --file=./schema.sql` depois de fazer login na CLI).
+**Importante:** se a integração atual do seu Cloudflare foi configurada para subir apenas arquivos estáticos, é preciso ajustar o comando de implantação para `npx wrangler deploy` (ou criar Worker via GitHub com esse comando). Só enviar ZIP não muda uma configuração de build que ignore o `wrangler.jsonc`.
 
-## 3. Configure Cloudflare Pages
-Workers & Pages > Create > **Pages** > Connect to Git > selecione o repositório.
-- Framework preset: **None**
-- Build command: **deixar vazio**
-- Build output directory: **public**
-- Root directory: `/` (raiz do repositório)
+O D1 já tem as tabelas `users`, `sessions`, `login_attempts` e `leads`; não recrie as tabelas. 
 
-Depois conecte o D1: no projeto **Pages** > Settings > Bindings > Add > D1 database, **Variable name = DB**, escolha o banco criado; aplique em **Production** (e em **Preview** se quiser prévias funcionais). Faça novo deploy após atualizar os bindings.
+O arquivo `LUMEA-SITE-COMPLETO-ABRIR.html` é uma prévia offline, não é o backend.
 
-## 4. Crie o segredo para o primeiro usuário
-Em Pages > Settings > Variables and Secrets (ou Environment variables, dependendo da interface), crie `SETUP_TOKEN` como **Secret**, usando um valor aleatório longo, com pelo menos 24 caracteres. Configure em Production e faça redeploy. Não coloque esse valor no GitHub.
-
-Acesse `https://SEU-PROJETO.pages.dev/login.html`; o campo de primeiro acesso aparece quando o banco não tem usuários. Digite o segredo, e-mail do administrador e senha de 12+ caracteres. Depois entre com e-mail e senha. **Somente o primeiro usuário pode ser criado pela instalação.**
-
-## 5. Teste
-1. Abra `/ofertas`; verifique as imagens e as outras páginas.
-2. Envie um cadastro no formulário, marcando consentimento.
-3. Entre em `/login.html`, abra `/painel.html` e confira o cadastro.
-4. Saia, tente acessar o painel e confirme o redirecionamento para login.
-
-## Desenvolvimento local (opcional)
-```bash
-npm install
-cp .dev.vars.example .dev.vars
-# mude SETUP_TOKEN para um valor secreto
-npx wrangler d1 create lumea-db
-# comando abaixo: substitua ID_DO_BANCO pela identificação retornada
-npx wrangler pages dev public --d1 DB=ID_DO_BANCO
-```
-Para desenvolvimento local, inicialize o D1 local com `npx wrangler d1 execute lumea-db --local --file=./schema.sql` após configurar a CLI ou use o painel para o banco remoto.
-
-## Notas importantes
-- **Não é necessário preencher um `wrangler.toml`**: as bindings são configuradas no dashboard do Pages, evitando guardar IDs dependentes de conta no projeto.
-- O arquivo JS pré-compilado preserva alguns códigos de integração do Manus, mas a única chamada de negócio identificada no formulário é `leads.capture`, agora atendida no Cloudflare. Outros recursos dependentes do backend original, se existirem, não são reproduzidos.
-- Os cadastros que já existiam no banco da Manus **não estão** no ZIP e não são migrados.
-- O painel é privado via API: a página HTML é pública, mas os dados de cadastros só são entregues com sessão válida.
-- Não há recuperação de senha por e-mail nem disparo de e-mails. Guarde as credenciais em segurança.
-- Para ter controle de edição sobre o frontend, é necessário obter ou reconstruir o código-fonte React original.
-
-Documentação: https://developers.cloudflare.com/pages/get-started/git-integration/ e https://developers.cloudflare.com/pages/functions/bindings/
-
-
-## Visualizar corretamente no computador
-
-O site usa rotas SPA (React) e arquivos em `/assets`. Abrir `public/index.html` diretamente como `file:///` não funciona: um servidor web é necessário. Para visualizar sem instalar nada, use o arquivo separado `LUMEA-SITE-COMPLETO-ABRIR.html` distribuído junto deste ZIP (versão independente com estilos, JS e imagens embutidos). Para testar o backend de login e D1, publique no Cloudflare Pages.
-
-
-## Visualizar corretamente no computador
-
-O site usa rotas SPA (React) e arquivos em `/assets`. Abrir `public/index.html` diretamente como `file:///` não funciona: um servidor web é necessário. Para visualizar sem instalar nada, use o arquivo separado `LUMEA-SITE-COMPLETO-ABRIR.html` distribuído junto deste ZIP (versão independente com estilos, JS e imagens embutidos). Para testar o backend de login e D1, publique no Cloudflare Pages.
+Documentação: https://developers.cloudflare.com/workers/static-assets/ e https://developers.cloudflare.com/workers/static-assets/binding/
