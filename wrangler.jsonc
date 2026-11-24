@@ -1,6 +1,6 @@
 {
   "$schema": "./node_modules/wrangler/config-schema.json",
-  "name": "lumea",
+  "name": "lum-a",
   "main": "src/worker.js",
   "compatibility_date": "2026-11-23",
   "assets": {
@@ -17,7 +17,7 @@
     {
       "binding": "DB",
       "database_name": "lumea_d1",
-      "database_id": "d07e93e-06a7-44c6-bbbb-21d438271414"
+      "database_id": "0d07e93e-06a7-44c6-bbbb-21d438271414"
     }
   ]
 }

@@ -7,7 +7,7 @@ Inclui `src/worker.js` para atender a API; assim `/api/trpc/leads.capture` respo
 
 1. Substitua **todos os arquivos na raiz** do seu repositório pelo conteúdo deste ZIP (inclusive `src/`, `functions/`, `public/` e `wrangler.jsonc`).
 2. Cloudflare > **Workers & Pages** > seu Worker > **Settings / Build** (Git integration). Confirme que a publicação usa `npx wrangler deploy` a partir da raiz, **não** um deploy apenas de assets. Publique novamente a partir do commit atualizado.
-3. O arquivo `wrangler.jsonc` configura `main: src/worker.js`, assets em `public/` e o D1 com binding `DB`. O banco usado é **lumea_d1** e o ID foi lido da URL do console do print enviado; confira se é o seu banco antes de publicar. Caso o ID seja outro, ajuste `database_id`.
+3. O arquivo `wrangler.jsonc` configura `main: src/worker.js`, assets em `public/` e o D1 com binding `DB`. O banco usado é **lumea_d1** e o ID **0d07e93e-06a7-44c6-bbbb-21d438271414** foi conferido na URL do console da captura enviada. O Worker está nomeado **lum-a**, correspondente ao projeto mostrado no Cloudflare.
 4. O segredo `SETUP_TOKEN` (mínimo de 24 caracteres) deve ser configurado em **Settings > Variables and Secrets** do Worker; não envie esse segredo ao GitHub.
 5. Se ainda não criou o administrador, abra `/login.html`. Para conferir se a API responde JSON, abra `/api/auth/setup` no site publicado: deve aparecer `{"setupRequired":true}` (ou `false` se já houver administrador).
 6. Faça um cadastro no popup; confira no D1: `SELECT email, created_at FROM leads ORDER BY created_at DESC LIMIT 5;`.
