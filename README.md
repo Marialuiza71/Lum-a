@@ -1,4 +1,4 @@
-# Luméa — Cloudflare Worker + D1 (corrigido)
+# Luméa — Cloudflare Worker + D1 (tRPC batch corrigido)
 
 **Esta versão é para a hospedagem Cloudflare Workers com assets estáticos que aparece no seu print.**
 Inclui `src/worker.js` para atender a API; assim `/api/trpc/leads.capture` responde JSON e pode salvar o cadastro no D1. O design do site e o produto de R$ 1,00 foram mantidos.
@@ -19,3 +19,7 @@ O D1 já tem as tabelas `users`, `sessions`, `login_attempts` e `leads`; não re
 O arquivo `LUMEA-SITE-COMPLETO-ABRIR.html` é uma prévia offline, não é o backend.
 
 Documentação: https://developers.cloudflare.com/workers/static-assets/ e https://developers.cloudflare.com/workers/static-assets/binding/
+
+## Correção do formulário (24/11/2026)
+
+O código do site utiliza tRPC com `httpBatchLink`. Agora a rota `/api/trpc/leads.capture?batch=1` reconhece o payload numerado (`{"0":{"json":{...}}}`) e retorna uma **lista** de resultados no formato tRPC/SuperJSON. A resposta anterior era um objeto único, causando `Unable to transform response from server`. Após substituir os arquivos no GitHub, faça um novo deploy do Worker. Não é necessário recriar D1.
