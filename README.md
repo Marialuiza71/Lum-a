@@ -23,3 +23,12 @@ Documentação: https://developers.cloudflare.com/workers/static-assets/ e https
 ## Correção do formulário (24/11/2026)
 
 O código do site utiliza tRPC com `httpBatchLink`. Agora a rota `/api/trpc/leads.capture?batch=1` reconhece o payload numerado (`{"0":{"json":{...}}}`) e retorna uma **lista** de resultados no formato tRPC/SuperJSON. A resposta anterior era um objeto único, causando `Unable to transform response from server`. Após substituir os arquivos no GitHub, faça um novo deploy do Worker. Não é necessário recriar D1.
+
+
+## Checkout demonstrativo (novo)
+
+- Na página `/ofertas`, o produto **Creme para Pentear Cachos Definidos — R$ 1,00** agora tem o botão **Simular compra**.
+- Esse botão abre `/checkout.html`, onde o visitante pode informar contato, endereço/CEP, quantidade e forma de pagamento fictícia.
+- A tela mostra um resumo e gera uma **referência fictícia no navegador**. Nenhuma cobrança, pedido real ou entrega acontece.
+- **Privacidade:** os campos do checkout não são enviados para a API e não são salvos no D1 ou em `localStorage`. A página não coleta números de cartão. O CEP não é consultado externamente.
+- Nenhuma migração SQL adicional é necessária; o D1 permanece configurado como antes.
