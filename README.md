@@ -56,3 +56,13 @@ Para desenvolvimento local, inicialize o D1 local com `npx wrangler d1 execute l
 - Para ter controle de edição sobre o frontend, é necessário obter ou reconstruir o código-fonte React original.
 
 Documentação: https://developers.cloudflare.com/pages/get-started/git-integration/ e https://developers.cloudflare.com/pages/functions/bindings/
+
+
+## Visualizar corretamente no computador
+
+O site usa rotas SPA (React) e arquivos em `/assets`. Abrir `public/index.html` diretamente como `file:///` não funciona: um servidor web é necessário. Para visualizar sem instalar nada, use o arquivo separado `LUMEA-SITE-COMPLETO-ABRIR.html` distribuído junto deste ZIP (versão independente com estilos, JS e imagens embutidos). Para testar o backend de login e D1, publique no Cloudflare Pages.
+
+
+## Visualizar corretamente no computador
+
+O site usa rotas SPA (React) e arquivos em `/assets`. Abrir `public/index.html` diretamente como `file:///` não funciona: um servidor web é necessário. Para visualizar sem instalar nada, use o arquivo separado `LUMEA-SITE-COMPLETO-ABRIR.html` distribuído junto deste ZIP (versão independente com estilos, JS e imagens embutidos). Para testar o backend de login e D1, publique no Cloudflare Pages.
